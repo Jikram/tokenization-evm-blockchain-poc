@@ -1,6 +1,6 @@
 # tokenization-evm-blockchain-poc
 
-EVM/Solidity equivalent of the [Stellar Soroban tokenization POC](https://github.com/) — a KYC-gated tokenized real-estate fund with an on-chain NAV oracle. Demonstrates the same compliance-gated asset issuance design on the dominant smart-contract platform.
+EVM/Solidity smartcontract KYC-gated tokenized real-estate fund with an on-chain NAV oracle. Demonstrates the compliance gated asset issuance design on the dominant smart contract platform.
 
 ## Project structure
 
