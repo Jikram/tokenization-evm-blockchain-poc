@@ -1,0 +1,118 @@
+import type {Address} from "viem";
+
+export const ORACLE_ADDRESS = (process.env.NEXT_PUBLIC_ORACLE_ADDRESS ?? "") as Address;
+export const FUND_ADDRESS = (process.env.NEXT_PUBLIC_FUND_ADDRESS ?? "") as Address;
+
+export const navOracleAbi = [
+    {type: "function", name: "owner", stateMutability: "view", inputs: [], outputs: [{type: "address"}]},
+    {type: "function", name: "hasPrice", stateMutability: "view", inputs: [], outputs: [{type: "bool"}]},
+    {type: "function", name: "getPrice", stateMutability: "view", inputs: [], outputs: [{type: "uint256"}]},
+    {type: "function", name: "updatePrice", stateMutability: "nonpayable", inputs: [{name: "price", type: "uint256"}], outputs: []},
+    {type: "function", name: "clearPrice", stateMutability: "nonpayable", inputs: [], outputs: []},
+    {type: "event", name: "PriceUpdated", inputs: [{indexed: true, name: "admin", type: "address"}, {indexed: false, name: "price", type: "uint256"}, {indexed: false, name: "timestamp", type: "uint256"}]},
+    {type: "event", name: "PriceCleared", inputs: [{indexed: true, name: "admin", type: "address"}, {indexed: false, name: "timestamp", type: "uint256"}]},
+    {type: "error", name: "NoPriceSet", inputs: []},
+    {type: "error", name: "PriceMustBePositive", inputs: []},
+] as const;
+
+export const tokenizedFundAbi = [
+    {type: "function", name: "admin", stateMutability: "view", inputs: [], outputs: [{type: "address"}]},
+    {type: "function", name: "owner", stateMutability: "view", inputs: [], outputs: [{type: "address"}]},
+    {type: "function", name: "getOracle", stateMutability: "view", inputs: [], outputs: [{type: "address"}]},
+    {type: "function", name: "name", stateMutability: "view", inputs: [], outputs: [{type: "string"}]},
+    {type: "function", name: "symbol", stateMutability: "view", inputs: [], outputs: [{type: "string"}]},
+    {type: "function", name: "decimals", stateMutability: "pure", inputs: [], outputs: [{type: "uint8"}]},
+    {type: "function", name: "totalSupply", stateMutability: "view", inputs: [], outputs: [{type: "uint256"}]},
+    {type: "function", name: "circulatingSupply", stateMutability: "view", inputs: [], outputs: [{type: "uint256"}]},
+    {type: "function", name: "cap", stateMutability: "view", inputs: [], outputs: [{type: "uint256"}]},
+    {type: "function", name: "balanceOf", stateMutability: "view", inputs: [{name: "account", type: "address"}], outputs: [{type: "uint256"}]},
+    {type: "function", name: "isApproved", stateMutability: "view", inputs: [{name: "user", type: "address"}], outputs: [{type: "bool"}]},
+    {
+        type: "function",
+        name: "getMetadata",
+        stateMutability: "view",
+        inputs: [],
+        outputs: [
+            {
+                type: "tuple",
+                components: [
+                    {name: "assetType", type: "string"},
+                    {name: "documentHash", type: "bytes"},
+                    {name: "country", type: "string"},
+                    {name: "region", type: "string"},
+                    {name: "issuedAt", type: "uint256"},
+                    {name: "minInvestment", type: "uint256"},
+                    {name: "isin", type: "string"},
+                    {name: "totalSupplyCap", type: "uint256"},
+                    {name: "status", type: "uint8"},
+                    {name: "tags", type: "string[]"},
+                    {name: "propertyKeys", type: "string[]"},
+                    {name: "propertyValues", type: "string[]"},
+                ],
+            },
+        ],
+    },
+    {type: "function", name: "approveUser", stateMutability: "nonpayable", inputs: [{name: "user", type: "address"}], outputs: []},
+    {type: "function", name: "mint", stateMutability: "nonpayable", inputs: [{name: "user", type: "address"}, {name: "amount", type: "uint256"}], outputs: [{type: "uint256"}]},
+    {type: "function", name: "burn", stateMutability: "nonpayable", inputs: [{name: "user", type: "address"}, {name: "amount", type: "uint256"}], outputs: [{type: "uint256"}]},
+    {
+        type: "function",
+        name: "clawback",
+        stateMutability: "nonpayable",
+        inputs: [
+            {name: "user", type: "address"},
+            {name: "amount", type: "uint256"},
+            {name: "reason", type: "string"},
+            {name: "severity", type: "int32"},
+            {name: "caseReference", type: "int64"},
+        ],
+        outputs: [{type: "uint256"}],
+    },
+    {type: "function", name: "transfer", stateMutability: "nonpayable", inputs: [{name: "to", type: "address"}, {name: "value", type: "uint256"}], outputs: [{type: "bool"}]},
+    {type: "event", name: "Initialized", inputs: [{indexed: true, name: "admin", type: "address"}, {indexed: false, name: "assetName", type: "string"}, {indexed: false, name: "timestamp", type: "uint256"}]},
+    {type: "event", name: "UserApproved", inputs: [{indexed: true, name: "admin", type: "address"}, {indexed: true, name: "user", type: "address"}, {indexed: false, name: "approved", type: "bool"}, {indexed: false, name: "timestamp", type: "uint256"}]},
+    {
+        type: "event",
+        name: "Minted",
+        inputs: [
+            {indexed: true, name: "admin", type: "address"},
+            {indexed: true, name: "user", type: "address"},
+            {indexed: false, name: "amount", type: "uint256"},
+            {indexed: false, name: "newBalance", type: "uint256"},
+            {indexed: false, name: "circulatingSupply", type: "uint256"},
+            {indexed: false, name: "navPrice", type: "uint256"},
+            {indexed: false, name: "timestamp", type: "uint256"},
+        ],
+    },
+    {
+        type: "event",
+        name: "Burned",
+        inputs: [
+            {indexed: true, name: "admin", type: "address"},
+            {indexed: true, name: "user", type: "address"},
+            {indexed: false, name: "amount", type: "uint256"},
+            {indexed: false, name: "newBalance", type: "uint256"},
+            {indexed: false, name: "circulatingSupply", type: "uint256"},
+            {indexed: false, name: "navPrice", type: "uint256"},
+            {indexed: false, name: "timestamp", type: "uint256"},
+        ],
+    },
+    {
+        type: "event",
+        name: "Clawback",
+        inputs: [
+            {indexed: true, name: "admin", type: "address"},
+            {indexed: true, name: "user", type: "address"},
+            {indexed: false, name: "amount", type: "uint256"},
+            {indexed: false, name: "newBalance", type: "uint256"},
+            {indexed: false, name: "circulatingSupply", type: "uint256"},
+            {indexed: false, name: "navPrice", type: "uint256"},
+            {indexed: false, name: "reason", type: "string"},
+            {indexed: false, name: "severity", type: "int32"},
+            {indexed: false, name: "caseReference", type: "int64"},
+            {indexed: false, name: "timestamp", type: "uint256"},
+        ],
+    },
+    {type: "error", name: "UserNotApproved", inputs: [{name: "user", type: "address"}]},
+    {type: "error", name: "ZeroAddress", inputs: []},
+] as const;
