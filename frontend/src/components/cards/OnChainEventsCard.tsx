@@ -1,11 +1,12 @@
 "use client";
 
 import {useCallback, useEffect, useState} from "react";
-import {usePublicClient, useAccount} from "wagmi";
+import {useAccount} from "wagmi";
 import {BentoCard} from "../BentoCard";
 import {ChartIcon, ExternalLinkIcon} from "../Icon";
 import {FUND_ADDRESS, ORACLE_ADDRESS, navOracleAbi, tokenizedFundAbi} from "@/lib/contracts";
 import {explorerAddr, formatCentsAsUsd, shortAddr} from "@/lib/format";
+import {fetchEventsFromEtherscan} from "@/lib/etherscan";
 
 type InitMetadata = {
     assetType: string;
@@ -23,15 +24,17 @@ type InitMetadata = {
 };
 
 type Entry = {
-    kind: "Minted" | "Burned" | "Clawback" | "UserApproved" | "PriceUpdated" | "PriceCleared" | "Initialized";
+    kind: "Minted" | "Burned" | "Clawback" | "UserApproved" | "Initialized";
     user?: string;
     amount?: bigint;
     nav?: bigint;
+    admin?: string;
     extra?: string;
     initMetadata?: InitMetadata;
     initAdmin?: string;
     initAssetName?: string;
     block: bigint;
+    timestamp: bigint;
     txHash: string;
 };
 
@@ -40,93 +43,71 @@ type Props = {
 };
 
 export function OnChainEventsCard({adminAddress}: Props) {
-    const client = usePublicClient();
     const {address: walletAddress} = useAccount();
     const [entries, setEntries] = useState<Entry[]>([]);
     const [loading, setLoading] = useState(false);
-    const [range, setRange] = useState<{from: bigint; to: bigint} | null>(null);
+    const [error, setError] = useState<string | null>(null);
+    const [fetchedCount, setFetchedCount] = useState<number | null>(null);
 
     const load = useCallback(async () => {
-        if (!client || !FUND_ADDRESS || !ORACLE_ADDRESS) return;
+        if (!FUND_ADDRESS || !ORACLE_ADDRESS) return;
         setLoading(true);
+        setError(null);
         try {
-            const head = await client.getBlockNumber();
-            const from = head > 50_000n ? head - 50_000n : 0n;
-            setRange({from, to: head});
-
-            const [fundLogs, oracleLogs] = await Promise.all([
-                client.getContractEvents({
-                    abi: tokenizedFundAbi,
-                    address: FUND_ADDRESS,
-                    fromBlock: from,
-                    toBlock: head,
-                }),
-                client.getContractEvents({
-                    abi: navOracleAbi,
-                    address: ORACLE_ADDRESS,
-                    fromBlock: from,
-                    toBlock: head,
-                }),
-            ]);
+            // Only fetch from the Fund contract — NAV oracle events are shown
+            // in the Cross-Contract NAV Oracle card itself, not here.
+            const fundLogs = await fetchEventsFromEtherscan(FUND_ADDRESS, tokenizedFundAbi as never);
+            setFetchedCount(fundLogs.length);
 
             const all: Entry[] = [];
             for (const l of fundLogs) {
-                if (l.blockNumber === null || l.transactionHash === null) continue;
                 const args = l.args as Record<string, unknown>;
+                const adminArg = args.admin as string | undefined;
                 if (l.eventName === "Minted" || l.eventName === "Burned" || l.eventName === "Clawback") {
                     all.push({
                         kind: l.eventName,
+                        admin: adminArg,
                         user: args.user as string,
                         amount: args.amount as bigint,
                         nav: args.navPrice as bigint,
                         extra: l.eventName === "Clawback" ? (args.reason as string) : undefined,
                         block: l.blockNumber,
+                        timestamp: l.timestamp,
                         txHash: l.transactionHash,
                     });
                 } else if (l.eventName === "UserApproved") {
                     all.push({
                         kind: "UserApproved",
+                        admin: adminArg,
                         user: args.user as string,
                         block: l.blockNumber,
+                        timestamp: l.timestamp,
                         txHash: l.transactionHash,
                     });
                 } else if (l.eventName === "Initialized") {
                     all.push({
                         kind: "Initialized",
-                        initAdmin: args.admin as string,
+                        admin: adminArg,
+                        initAdmin: adminArg,
                         initAssetName: args.assetName as string,
                         initMetadata: args.metadata as InitMetadata,
                         block: l.blockNumber,
+                        timestamp: l.timestamp,
                         txHash: l.transactionHash,
                     });
                 }
             }
-            for (const l of oracleLogs) {
-                if (l.blockNumber === null || l.transactionHash === null) continue;
-                const args = l.args as Record<string, unknown>;
-                if (l.eventName === "PriceUpdated") {
-                    all.push({
-                        kind: "PriceUpdated",
-                        nav: args.price as bigint,
-                        block: l.blockNumber,
-                        txHash: l.transactionHash,
-                    });
-                } else if (l.eventName === "PriceCleared") {
-                    all.push({
-                        kind: "PriceCleared",
-                        block: l.blockNumber,
-                        txHash: l.transactionHash,
-                    });
-                }
-            }
-            all.sort((a, b) => (b.block > a.block ? 1 : b.block < a.block ? -1 : 0));
+            // Chronological ascending — Initialized first, most recent last
+            all.sort((a, b) => (a.block > b.block ? 1 : a.block < b.block ? -1 : 0));
             setEntries(all);
         } catch (e) {
             console.error("Failed to fetch on-chain events", e);
+            const msg = (e as Error)?.message ?? "Unknown error";
+            setError(msg.length > 240 ? msg.slice(0, 240) + "…" : msg);
         } finally {
             setLoading(false);
         }
-    }, [client]);
+    }, []);
 
     useEffect(() => {
         load();
@@ -152,15 +133,19 @@ export function OnChainEventsCard({adminAddress}: Props) {
                 </button>
             }
         >
-            {range && (
-                <p className="-mt-2 mb-3 text-[10px] text-zinc-400">
-                    Blocks {range.from.toLocaleString()} → {range.to.toLocaleString()} · ~
-                    {Math.round((Number(range.to - range.from) * 12) / 3600)}h window
-                </p>
+            <p className="-mt-2 mb-3 text-[10px] text-zinc-400">
+                Full history via Etherscan API
+                {fetchedCount !== null && ` · ${fetchedCount} log(s) fetched`}
+            </p>
+
+            {error && (
+                <div className="mb-3 rounded-lg border border-rose-300 bg-rose-50 p-2.5 text-[11px] text-rose-700">
+                    <p className="font-semibold">Fetch failed</p>
+                    <p className="mt-0.5 font-mono">{error}</p>
+                </div>
             )}
 
             <div className="mb-4 space-y-2">
-                <ContractRow label="Token Fund" value={FUND_ADDRESS} />
                 {adminAddress && (
                     <div className="rounded-xl border border-violet-200 bg-white p-3">
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-700">Admin Wallet</p>
@@ -184,7 +169,7 @@ export function OnChainEventsCard({adminAddress}: Props) {
                 )}
             </div>
 
-            <ol className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+            <ol className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
                 {entries.length === 0 && !loading && (
                     <li className="rounded-xl border border-dashed border-zinc-200 bg-zinc-50/50 p-5 text-center text-xs text-zinc-500">
                         No events yet. Mint or update the oracle to populate.
@@ -273,13 +258,6 @@ export function OnChainEventsCard({adminAddress}: Props) {
                                     )}
                                 </>
                             )}
-                            {e.kind === "PriceUpdated" && (
-                                <>
-                                    NAV updated to{" "}
-                                    <span className="font-medium tabular-nums">{formatCentsAsUsd(e.nav)}</span>
-                                </>
-                            )}
-                            {e.kind === "PriceCleared" && <>Oracle price cleared (atomic-revert demo)</>}
                         </p>
 
                         {/* Rich init metadata panel — captured at deploy time, admin immutable */}
@@ -352,9 +330,25 @@ export function OnChainEventsCard({adminAddress}: Props) {
                             </div>
                         )}
 
+                        {/* Approval + timestamp footer — every admin action shows who approved + when */}
+                        {e.admin && (
+                            <p className="mt-2 text-[10px] text-zinc-500">
+                                ✓ approved by admin{" "}
+                                <a
+                                    href={explorerAddr(e.admin)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="font-mono text-violet-600 hover:text-violet-800"
+                                >
+                                    {shortAddr(e.admin)}
+                                </a>{" "}
+                                · {new Date(Number(e.timestamp) * 1000).toLocaleString()}
+                            </p>
+                        )}
+
                         <div className="mt-1.5 flex items-center justify-between text-[10px] text-zinc-400">
                             <span>Block {e.block.toLocaleString()}</span>
-                            {e.nav !== undefined && e.kind !== "PriceUpdated" && (
+                            {e.nav !== undefined && (
                                 <span className="tabular-nums">@ {formatCentsAsUsd(e.nav)}</span>
                             )}
                             {e.extra && e.kind === "Clawback" && <span>· {e.extra}</span>}
@@ -403,8 +397,6 @@ function KindBadge({kind}: {kind: Entry["kind"]}) {
         Burned: "bg-rose-100 text-rose-700 ring-rose-200",
         Clawback: "bg-amber-100 text-amber-700 ring-amber-200",
         UserApproved: "bg-violet-100 text-violet-700 ring-violet-200",
-        PriceUpdated: "bg-violet-100 text-violet-700 ring-violet-200",
-        PriceCleared: "bg-amber-100 text-amber-700 ring-amber-200",
     };
     return (
         <span

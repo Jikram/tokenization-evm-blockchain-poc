@@ -2,6 +2,8 @@
 
 import {useAccount} from "wagmi";
 import {ConnectWallet} from "@/components/ConnectWallet";
+import {WrongChainBanner} from "@/components/WrongChainBanner";
+import {PendingTxToast} from "@/components/PendingTxToast";
 import {BentoCard} from "@/components/BentoCard";
 import {CopyableAddress} from "@/components/CopyableAddress";
 import {NavOracleCard} from "@/components/cards/NavOracleCard";
@@ -33,6 +35,7 @@ export default function Home() {
 
     return (
         <main className="mx-auto max-w-7xl px-4 py-8 md:py-10">
+            <PendingTxToast />
             <header className="mb-6 flex items-start justify-between gap-6">
                 <div className="flex items-start gap-4">
                     <div className="mt-1 flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-violet-600 shadow-bento">
@@ -56,6 +59,8 @@ export default function Home() {
                     <ConnectWallet />
                 </div>
             </header>
+
+            <WrongChainBanner />
 
             {/* Address strip — wrapped in a violet card to match the Activity card */}
             {overview.hasAddresses && (
@@ -110,81 +115,82 @@ export default function Home() {
             )}
 
             {overview.hasAddresses && (
-                <>
-                    {/* TOP ROW: NAV + Asset Overview + Activity — all same height */}
-                    <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
-                        <div className="lg:col-span-3">
-                            <NavOracleCard
-                                priceCents={overview.priceCents}
-                                hasPrice={overview.hasPrice}
-                                isAdmin={isAdmin}
-                                isConnected={Boolean(address)}
-                                isLoading={overview.isLoading}
-                                onSettled={onSettled}
-                                onRefresh={overview.refetch}
-                            />
-                        </div>
-                        <div className="lg:col-span-5">
-                            <AssetOverviewCard
-                                metadata={overview.metadata}
-                                name={overview.name}
-                                circulating={overview.circulating}
-                                cap={overview.cap}
-                            />
-                        </div>
-                        <div className="lg:col-span-4">
-                            <ActivityLogCard />
-                        </div>
-                    </section>
-
-                    {/* BOTTOM ROW: main column rest (col-span-8) + On-Chain (col-span-4) */}
-                    <section className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
-                        <div className="space-y-4 lg:col-span-8">
-                            <KycCheckCard />
-
-                            <SectionHeader>
-                                Admin Controls
-                                {isAdmin ? (
-                                    <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
-                                        ✓ You are admin
-                                    </span>
-                                ) : (
-                                    <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-200">
-                                        Admin-only
-                                    </span>
-                                )}
-                            </SectionHeader>
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                                <AdminCard
-                                    action="approve"
-                                    title="Whitelist"
-                                    subtitle="Approve KYC for a user"
+                <div className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+                    {/* MAIN COLUMN */}
+                    <div className="space-y-4 lg:col-span-8">
+                        {/* NAV + Asset Overview row */}
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-8">
+                            <div className="md:col-span-3">
+                                <NavOracleCard
+                                    priceCents={overview.priceCents}
+                                    hasPrice={overview.hasPrice}
                                     isAdmin={isAdmin}
+                                    isConnected={Boolean(address)}
+                                    isLoading={overview.isLoading}
                                     onSettled={onSettled}
-                                />
-                                <AdminCard
-                                    action="mint"
-                                    title="Mint"
-                                    subtitle="Issue tokens · atomic w/ NAV"
-                                    isAdmin={isAdmin}
-                                    onSettled={onSettled}
-                                />
-                                <AdminCard
-                                    action="burn"
-                                    title="Burn"
-                                    subtitle="Voluntary redemption"
-                                    isAdmin={isAdmin}
-                                    onSettled={onSettled}
+                                    onRefresh={overview.refetch}
                                 />
                             </div>
-                            <ClawbackCard isAdmin={isAdmin} onSettled={onSettled} />
+                            <div className="md:col-span-5">
+                                <AssetOverviewCard
+                                    metadata={overview.metadata}
+                                    name={overview.name}
+                                    circulating={overview.circulating}
+                                    cap={overview.cap}
+                                />
+                            </div>
                         </div>
 
-                        <div className="lg:col-span-4">
+                        <KycCheckCard />
+
+                        <SectionHeader>
+                            Admin Controls
+                            {isAdmin ? (
+                                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                                    ✓ You are admin
+                                </span>
+                            ) : (
+                                <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-amber-700 ring-1 ring-amber-200">
+                                    Admin-only
+                                </span>
+                            )}
+                        </SectionHeader>
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            <AdminCard
+                                action="approve"
+                                title="Whitelist"
+                                subtitle="Approve KYC for a user"
+                                isAdmin={isAdmin}
+                                onSettled={onSettled}
+                            />
+                            <AdminCard
+                                action="mint"
+                                title="Mint"
+                                subtitle="Issue tokens · atomic w/ NAV"
+                                isAdmin={isAdmin}
+                                onSettled={onSettled}
+                            />
+                            <AdminCard
+                                action="burn"
+                                title="Burn"
+                                subtitle="Voluntary redemption"
+                                isAdmin={isAdmin}
+                                onSettled={onSettled}
+                            />
+                        </div>
+                        <ClawbackCard isAdmin={isAdmin} onSettled={onSettled} />
+                    </div>
+
+                    {/* SIDEBAR — Activity (compact, fixed height) on top, On-Chain (fills rest, scrolls) below */}
+                    <aside className="flex flex-col gap-4 lg:col-span-4">
+                        <div className="h-[520px]">
+                            <ActivityLogCard />
+                        </div>
+                        <div className="min-h-0 flex-1">
                             <OnChainEventsCard adminAddress={overview.admin} />
                         </div>
-                    </section>
-                </>
+                    </aside>
+                </div>
             )}
 
             <footer className="mt-12 text-center text-xs text-zinc-400">

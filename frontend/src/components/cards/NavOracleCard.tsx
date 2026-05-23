@@ -2,6 +2,7 @@
 
 import {useState} from "react";
 import {useAccount, useWriteContract} from "wagmi";
+import {sepolia} from "wagmi/chains";
 import {BentoCard} from "../BentoCard";
 import {ChartIcon, ExternalLinkIcon, SparkleIcon} from "../Icon";
 import {ORACLE_ADDRESS, navOracleAbi} from "@/lib/contracts";
@@ -38,7 +39,7 @@ export function NavOracleCard({
         const cents = BigInt(Math.round(dollars * 100));
         const id = push({type: "oracle_update", status: "pending", message: `Update NAV → $${dollars.toFixed(2)}`});
         writeContract(
-            {address: ORACLE_ADDRESS, abi: navOracleAbi, functionName: "updatePrice", args: [cents]},
+            {address: ORACLE_ADDRESS, abi: navOracleAbi, functionName: "updatePrice", args: [cents], chainId: sepolia.id},
             {
                 onSuccess: (txHash) => {
                     update(id, {status: "success", txHash, message: `NAV updated → $${dollars.toFixed(2)}`});
@@ -56,7 +57,7 @@ export function NavOracleCard({
     const clear = () => {
         const id = push({type: "oracle_clear", status: "pending", message: "Clear NAV price"});
         writeContract(
-            {address: ORACLE_ADDRESS, abi: navOracleAbi, functionName: "clearPrice"},
+            {address: ORACLE_ADDRESS, abi: navOracleAbi, functionName: "clearPrice", chainId: sepolia.id},
             {
                 onSuccess: (txHash) => {
                     update(id, {status: "success", txHash, message: "Oracle price cleared (atomic-revert demo)"});

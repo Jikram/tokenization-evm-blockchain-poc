@@ -2,6 +2,7 @@
 
 import {useState} from "react";
 import {useAccount, useWriteContract} from "wagmi";
+import {sepolia} from "wagmi/chains";
 import {isAddress} from "viem";
 import {BentoCard, type Accent} from "../BentoCard";
 import {UserCheckIcon, PlusCircleIcon, MinusCircleIcon} from "../Icon";
@@ -79,17 +80,17 @@ export function AdminCard({action, title, subtitle, isAdmin, onSettled}: Props) 
 
         if (action === "approve") {
             writeContract(
-                {address: FUND_ADDRESS, abi: tokenizedFundAbi, functionName: "approveUser", args: [userAddr]},
+                {address: FUND_ADDRESS, abi: tokenizedFundAbi, functionName: "approveUser", args: [userAddr], chainId: sepolia.id},
                 {onSuccess: (h) => onResult(h), onError: (e) => onResult(undefined, e)}
             );
         } else if (action === "mint") {
             writeContract(
-                {address: FUND_ADDRESS, abi: tokenizedFundAbi, functionName: "mint", args: [userAddr, BigInt(amount)]},
+                {address: FUND_ADDRESS, abi: tokenizedFundAbi, functionName: "mint", args: [userAddr, BigInt(amount)], chainId: sepolia.id},
                 {onSuccess: (h) => onResult(h), onError: (e) => onResult(undefined, e)}
             );
         } else {
             writeContract(
-                {address: FUND_ADDRESS, abi: tokenizedFundAbi, functionName: "burn", args: [userAddr, BigInt(amount)]},
+                {address: FUND_ADDRESS, abi: tokenizedFundAbi, functionName: "burn", args: [userAddr, BigInt(amount)], chainId: sepolia.id},
                 {onSuccess: (h) => onResult(h), onError: (e) => onResult(undefined, e)}
             );
         }
