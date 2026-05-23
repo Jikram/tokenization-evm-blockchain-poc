@@ -29,6 +29,7 @@ export function ActivityLogCard() {
             title="Activity"
             subtitle="Local session log"
             icon={<ActivityIcon size={16} />}
+            className="h-full"
             action={
                 entries.length > 0 ? (
                     <button
@@ -45,7 +46,7 @@ export function ActivityLogCard() {
                     No activity yet. Connect a wallet and interact with the contract.
                 </div>
             ) : (
-                <ol className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+                <ol className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
                     {entries.map((e) => (
                         <li
                             key={e.id}
@@ -82,7 +83,7 @@ export function ActivityLogCard() {
                                     href={`https://sepolia.etherscan.io/tx/${e.txHash}`}
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="mt-1.5 inline-flex items-center gap-1 truncate font-mono text-[11px] text-cb-600 hover:text-cb-700"
+                                    className="mt-1.5 inline-flex items-center gap-1 truncate font-mono text-[11px] text-violet-600 hover:text-violet-700"
                                 >
                                     {e.txHash.slice(0, 10)}…{e.txHash.slice(-8)}
                                     <ExternalLinkIcon size={10} />

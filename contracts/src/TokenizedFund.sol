@@ -46,7 +46,9 @@ contract TokenizedFund is ERC20Capped, Ownable {
 
     AssetMetadata private _metadata;
 
-    event Initialized(address indexed admin, string assetName, uint256 timestamp);
+    event Initialized(
+        address indexed admin, string assetName, AssetMetadata metadata, uint256 timestamp
+    );
     event UserApproved(
         address indexed admin, address indexed user, bool approved, uint256 timestamp
     );
@@ -83,6 +85,7 @@ contract TokenizedFund is ERC20Capped, Ownable {
 
     error UserNotApproved(address user);
     error ZeroAddress();
+    error AdminImmutable();
 
     constructor(address admin, string memory assetName, address oracleAddress)
         ERC20(assetName, "TFUND")
@@ -122,7 +125,17 @@ contract TokenizedFund is ERC20Capped, Ownable {
             propertyKeys: propKeys,
             propertyValues: propValues
         });
-        emit Initialized(admin, assetName, block.timestamp);
+        emit Initialized(admin, assetName, _metadata, block.timestamp);
+    }
+
+    /// @notice Admin is locked at deploy time and cannot be changed — matches the
+    ///         Stellar sibling POC's `initialize-once` semantics.
+    function transferOwnership(address) public pure override {
+        revert AdminImmutable();
+    }
+
+    function renounceOwnership() public pure override {
+        revert AdminImmutable();
     }
 
     /// @notice Whole-token decimals so balances mirror Stellar's `u32` semantics 1:1.

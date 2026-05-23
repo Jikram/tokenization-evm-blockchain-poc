@@ -304,6 +304,20 @@ contract TokenizedFundTest is Test {
         assertEq(fund.balanceOf(user), 100);
     }
 
+    // ─── Admin immutability ────────────────────────────────────────────────
+
+    function test_admin_cannot_transfer_ownership() public {
+        vm.prank(admin);
+        vm.expectRevert(TokenizedFund.AdminImmutable.selector);
+        fund.transferOwnership(attacker);
+    }
+
+    function test_admin_cannot_renounce_ownership() public {
+        vm.prank(admin);
+        vm.expectRevert(TokenizedFund.AdminImmutable.selector);
+        fund.renounceOwnership();
+    }
+
     // ─── Fuzz ──────────────────────────────────────────────────────────────
 
     function testFuzz_mint_never_exceeds_total_supply(uint256 amount) public {

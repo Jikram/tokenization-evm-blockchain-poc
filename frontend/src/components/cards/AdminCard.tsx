@@ -20,15 +20,15 @@ type Props = {
 };
 
 const ACCENTS: Record<Action, Accent> = {
-    approve: "blue",
-    mint: "emerald",
-    burn: "rose",
+    approve: "amber",
+    mint: "amber",
+    burn: "amber",
 };
 
 const BTN_BG: Record<Action, string> = {
-    approve: "bg-cb-600 hover:bg-cb-700",
-    mint: "bg-emerald-600 hover:bg-emerald-700",
-    burn: "bg-rose-600 hover:bg-rose-700",
+    approve: "bg-amber-600 hover:bg-amber-700",
+    mint: "bg-amber-600 hover:bg-amber-700",
+    burn: "bg-amber-600 hover:bg-amber-700",
 };
 
 function iconFor(action: Action) {
@@ -44,7 +44,7 @@ function activityType(action: Action): ActivityType {
 }
 
 export function AdminCard({action, title, subtitle, isAdmin, onSettled}: Props) {
-    const {isConnected} = useAccount();
+    const {address: connectedAddress, isConnected} = useAccount();
     const {writeContract, isPending} = useWriteContract();
     const {push, update} = useActivityLog();
     const [user, setUser] = useState("");
@@ -102,7 +102,7 @@ export function AdminCard({action, title, subtitle, isAdmin, onSettled}: Props) 
             subtitle={subtitle}
             icon={iconFor(action)}
             action={
-                <span className="inline-flex items-center gap-1 rounded-full bg-zinc-900/5 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-zinc-500">
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-900/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-700">
                     Admin
                 </span>
             }
@@ -113,15 +113,27 @@ export function AdminCard({action, title, subtitle, isAdmin, onSettled}: Props) 
                     onChange={(e) => setUser(e.target.value)}
                     placeholder="0x… user address"
                     disabled={disabled}
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-mono focus:border-cb-500 focus:outline-none focus:ring-2 focus:ring-cb-100 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-400"
+                    className="w-full rounded-lg border border-amber-200 bg-white px-3 py-1.5 text-sm font-mono focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-100 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-400"
                 />
+                {action === "approve" && isConnected && connectedAddress && (
+                    <button
+                        type="button"
+                        onClick={() => setUser(connectedAddress)}
+                        disabled={disabled}
+                        className="inline-flex items-center gap-1 rounded-md border border-amber-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-amber-700 transition hover:bg-amber-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        title="Prefill with your connected wallet"
+                    >
+                        Use my wallet
+                        <span className="font-mono text-zinc-500">({shortAddr(connectedAddress)})</span>
+                    </button>
+                )}
                 {action !== "approve" && (
                     <input
                         value={amount}
                         onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, ""))}
                         placeholder="Amount (whole tokens)"
                         disabled={disabled}
-                        className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm tabular-nums focus:border-cb-500 focus:outline-none focus:ring-2 focus:ring-cb-100 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-400"
+                        className="w-full rounded-lg border border-amber-200 bg-white px-3 py-1.5 text-sm tabular-nums focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-100 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-400"
                     />
                 )}
                 <button

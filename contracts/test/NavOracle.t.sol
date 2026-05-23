@@ -81,6 +81,18 @@ contract NavOracleTest is Test {
         oracle.updatePrice(0);
     }
 
+    function test_admin_cannot_transfer_ownership() public {
+        vm.prank(admin);
+        vm.expectRevert(NavOracle.AdminImmutable.selector);
+        oracle.transferOwnership(attacker);
+    }
+
+    function test_admin_cannot_renounce_ownership() public {
+        vm.prank(admin);
+        vm.expectRevert(NavOracle.AdminImmutable.selector);
+        oracle.renounceOwnership();
+    }
+
     function test_price_updated_event_fired() public {
         vm.expectEmit(true, false, false, false, address(oracle));
         emit NavOracle.PriceUpdated(admin, 100_000, block.timestamp);

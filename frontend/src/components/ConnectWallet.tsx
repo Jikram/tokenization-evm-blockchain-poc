@@ -72,26 +72,51 @@ export function ConnectWallet() {
 
     if (isConnected && address) {
         return (
-            <button
-                onClick={() => disconnect()}
-                className="rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm font-medium text-zinc-700 shadow-bento transition hover:bg-zinc-50"
-                title="Disconnect"
-            >
-                <span className="font-mono">{shortAddr(address)}</span>
-                <span className="ml-2 text-zinc-400">↗</span>
-            </button>
+            <div className="inline-flex items-center gap-1.5">
+                <div className="inline-flex items-center gap-1.5 rounded-lg border border-violet-200 bg-violet-50 px-3 py-1.5 text-sm font-medium text-violet-800 shadow-bento">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    <span className="font-mono">{shortAddr(address)}</span>
+                </div>
+                <button
+                    onClick={() => disconnect()}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 shadow-bento transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
+                    title="Disconnect wallet"
+                    aria-label="Disconnect wallet"
+                >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M6 6l12 12M18 6l-12 12" />
+                    </svg>
+                </button>
+            </div>
         );
     }
 
     return (
         <>
-            <button
-                onClick={() => setPickerOpen(true)}
-                disabled={isPending}
-                className="rounded-lg bg-cb-600 px-4 py-1.5 text-sm font-semibold text-white shadow-bento transition hover:bg-cb-700 disabled:opacity-60"
-            >
-                {isPending ? "Connecting…" : "Connect wallet"}
-            </button>
+            <div className="inline-flex items-center gap-1.5">
+                <button
+                    onClick={() => setPickerOpen(true)}
+                    disabled={isPending}
+                    className="rounded-lg bg-violet-600 px-4 py-1.5 text-sm font-semibold text-white shadow-bento transition hover:bg-violet-700 disabled:opacity-60"
+                >
+                    {isPending ? "Connecting…" : "Connect wallet"}
+                </button>
+                {(pickerOpen || isPending) && (
+                    <button
+                        onClick={() => {
+                            setPickerOpen(false);
+                            setWcUri(null);
+                        }}
+                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 bg-white text-zinc-500 shadow-bento transition hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
+                        title="Cancel"
+                        aria-label="Cancel connect wallet"
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M6 6l12 12M18 6l-12 12" />
+                        </svg>
+                    </button>
+                )}
+            </div>
             <WalletPickerModal
                 isOpen={pickerOpen}
                 onClose={() => {

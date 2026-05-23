@@ -88,6 +88,94 @@ const WALLETS: Wallet[] = [
         category: "mobile",
         deepLink: (uri) => `https://wallet.zerion.io/wc?uri=${encodeURIComponent(uri)}`,
     },
+    {
+        id: "ledger",
+        name: "Ledger Live",
+        label: "LD",
+        color: "#000000",
+        category: "mobile",
+        deepLink: (uri) => `ledgerlive://wc?uri=${encodeURIComponent(uri)}`,
+    },
+    {
+        id: "safe",
+        name: "Safe",
+        label: "SF",
+        color: "#12FF80",
+        category: "mobile",
+        deepLink: (uri) => `https://app.safe.global/wc?uri=${encodeURIComponent(uri)}`,
+    },
+    {
+        id: "imtoken",
+        name: "imToken",
+        label: "IT",
+        color: "#11C4D1",
+        category: "mobile",
+        deepLink: (uri) => `imtokenv2://wc?uri=${encodeURIComponent(uri)}`,
+    },
+    {
+        id: "bitget",
+        name: "Bitget Wallet",
+        label: "BG",
+        color: "#3475E2",
+        category: "mobile",
+        deepLink: (uri) => `bitkeep://wc?uri=${encodeURIComponent(uri)}`,
+    },
+    {
+        id: "exodus",
+        name: "Exodus",
+        label: "EX",
+        color: "#7E2EBC",
+        category: "mobile",
+        deepLink: (uri) => `exodus://wc?uri=${encodeURIComponent(uri)}`,
+    },
+    {
+        id: "uniswap",
+        name: "Uniswap Wallet",
+        label: "UN",
+        color: "#FF007A",
+        category: "mobile",
+        deepLink: (uri) => `https://uniswap.org/app/wc?uri=${encodeURIComponent(uri)}`,
+    },
+    {
+        id: "1inch",
+        name: "1inch Wallet",
+        label: "1I",
+        color: "#1B314F",
+        category: "mobile",
+        deepLink: (uri) => `oneinch://wc?uri=${encodeURIComponent(uri)}`,
+    },
+    {
+        id: "tokenpocket",
+        name: "TokenPocket",
+        label: "TP",
+        color: "#2B6CDE",
+        category: "mobile",
+        deepLink: (uri) => `tpoutside://wc?uri=${encodeURIComponent(uri)}`,
+    },
+    {
+        id: "kraken",
+        name: "Kraken Wallet",
+        label: "KR",
+        color: "#5841D8",
+        category: "mobile",
+        deepLink: (uri) => `kraken-wallet://wc?uri=${encodeURIComponent(uri)}`,
+    },
+    {
+        id: "frame",
+        name: "Frame",
+        label: "FR",
+        color: "#7B7B7B",
+        category: "mobile",
+        deepLink: (uri) => `frame://wc?uri=${encodeURIComponent(uri)}`,
+    },
+    {
+        id: "ronin",
+        name: "Ronin Wallet",
+        label: "RN",
+        color: "#1273EA",
+        category: "mobile",
+        deepLink: (uri) => `roninwallet://wc?uri=${encodeURIComponent(uri)}`,
+    },
 ];
 
 type Props = {
@@ -149,15 +237,16 @@ export function WalletPickerModal({isOpen, onClose, wcUri, onPickExtension, onSt
             onClick={onClose}
         >
             <div
-                className="pop-in flex w-full max-w-md flex-col rounded-2xl border border-zinc-200 bg-white shadow-bento-lg"
+                className="pop-in flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-violet-200 bg-violet-50 shadow-bento-lg"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
-                <div className="relative flex items-center justify-center border-b border-zinc-100 px-6 py-4">
+                {/* Header — violet accent stripe + tinted bg */}
+                <div className="relative flex items-center justify-center border-b border-violet-200 bg-gradient-to-b from-violet-100/80 to-violet-50/40 px-6 py-4">
+                    <div className="absolute inset-x-0 top-0 h-1 bg-violet-500" />
                     {inQrView && (
                         <button
                             onClick={() => setSelectedWallet(null)}
-                            className="absolute left-3 rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+                            className="absolute left-3 rounded-md p-1 text-violet-500 hover:bg-violet-100 hover:text-violet-800"
                             aria-label="Back"
                         >
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -170,7 +259,7 @@ export function WalletPickerModal({isOpen, onClose, wcUri, onPickExtension, onSt
                     </h3>
                     <button
                         onClick={onClose}
-                        className="absolute right-3 rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700"
+                        className="absolute right-3 rounded-md p-1 text-violet-500 hover:bg-violet-100 hover:text-violet-800"
                         aria-label="Close"
                     >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -182,10 +271,10 @@ export function WalletPickerModal({isOpen, onClose, wcUri, onPickExtension, onSt
                 {!inQrView && (
                     <>
                         {/* Search */}
-                        <div className="border-b border-zinc-100 p-4">
+                        <div className="border-b border-violet-100 bg-white p-4">
                             <div className="relative">
                                 <svg
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-violet-400"
                                     width="16"
                                     height="16"
                                     viewBox="0 0 24 24"
@@ -201,13 +290,13 @@ export function WalletPickerModal({isOpen, onClose, wcUri, onPickExtension, onSt
                                     value={query}
                                     onChange={(e) => setQuery(e.target.value)}
                                     placeholder="Search wallets…"
-                                    className="w-full rounded-lg border border-zinc-200 bg-white py-2 pl-9 pr-3 text-sm focus:border-cb-500 focus:outline-none focus:ring-2 focus:ring-cb-100"
+                                    className="w-full rounded-lg border border-violet-200 bg-white py-2 pl-9 pr-3 text-sm focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-100"
                                 />
                             </div>
                         </div>
 
                         {/* Wallet list */}
-                        <div className="max-h-[400px] overflow-y-auto p-3">
+                        <div className="max-h-[400px] overflow-y-auto bg-white p-3">
                             {extensions.length > 0 && (
                                 <div>
                                     <div className="px-2 pb-2 pt-1 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
@@ -251,14 +340,14 @@ export function WalletPickerModal({isOpen, onClose, wcUri, onPickExtension, onSt
                             )}
                         </div>
 
-                        <div className="border-t border-zinc-100 px-6 py-3 text-center text-[11px] text-zinc-400">
+                        <div className="border-t border-violet-100 bg-gradient-to-b from-violet-50 to-violet-100/30 px-6 py-3 text-center text-[11px] text-violet-700">
                             Powered by WalletConnect · Sepolia testnet
                         </div>
                     </>
                 )}
 
                 {inQrView && (
-                    <div className="p-6">
+                    <div className="bg-white p-6">
                         {wcUri ? (
                             <>
                                 <p className="text-center text-sm text-zinc-600">
@@ -266,7 +355,7 @@ export function WalletPickerModal({isOpen, onClose, wcUri, onPickExtension, onSt
                                 </p>
 
                                 <div className="mt-5 flex justify-center">
-                                    <div className="relative flex items-center justify-center rounded-2xl bg-white p-3 ring-1 ring-zinc-200">
+                                    <div className="relative flex items-center justify-center rounded-2xl bg-white p-3 ring-1 ring-violet-200">
                                         <canvas ref={canvasRef} className="rounded-md" />
                                         <div
                                             className="pointer-events-none absolute flex h-12 w-12 items-center justify-center rounded-xl ring-2 ring-white"
@@ -283,7 +372,7 @@ export function WalletPickerModal({isOpen, onClose, wcUri, onPickExtension, onSt
                                             href={selectedWallet.deepLink(wcUri)}
                                             target="_blank"
                                             rel="noreferrer"
-                                            className="block w-full rounded-lg bg-cb-600 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-cb-700"
+                                            className="block w-full rounded-lg bg-violet-600 px-3 py-2 text-center text-sm font-semibold text-white transition hover:bg-violet-700"
                                         >
                                             Open in {selectedWallet.name}
                                         </a>
@@ -294,7 +383,7 @@ export function WalletPickerModal({isOpen, onClose, wcUri, onPickExtension, onSt
                                             await navigator.clipboard.writeText(wcUri);
                                             setCopied(true);
                                         }}
-                                        className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50"
+                                        className="w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-sm font-medium text-violet-700 transition hover:bg-violet-50"
                                     >
                                         {copied ? "Copied!" : "Copy WalletConnect URI"}
                                     </button>
@@ -302,7 +391,7 @@ export function WalletPickerModal({isOpen, onClose, wcUri, onPickExtension, onSt
                             </>
                         ) : (
                             <div className="flex items-center justify-center py-12 text-sm text-zinc-500">
-                                <span className="mr-2 inline-block h-3 w-3 animate-pulse rounded-full bg-cb-500" />
+                                <span className="mr-2 inline-block h-3 w-3 animate-pulse rounded-full bg-violet-500" />
                                 Generating QR code…
                             </div>
                         )}
