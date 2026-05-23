@@ -2,21 +2,33 @@
 
 import {useState} from "react";
 import {useAccount, useWriteContract} from "wagmi";
+import {sepolia} from "wagmi/chains";
 import {BentoCard} from "../BentoCard";
-import {ChartIcon, SparkleIcon} from "../Icon";
+import {ChartIcon, ExternalLinkIcon, SparkleIcon} from "../Icon";
 import {ORACLE_ADDRESS, navOracleAbi} from "@/lib/contracts";
-import {formatCentsAsUsd} from "@/lib/format";
+import {explorerAddr, formatCentsAsUsd, shortAddr} from "@/lib/format";
 import {useActivityLog} from "@/hooks/useActivityLog";
 
 type Props = {
     priceCents?: bigint;
     hasPrice?: boolean;
     isAdmin: boolean;
+    isConnected: boolean;
+    isLoading: boolean;
     onSettled: () => void;
+    onRefresh: () => void;
 };
 
-export function NavOracleCard({priceCents, hasPrice, isAdmin, onSettled}: Props) {
-    const {isConnected} = useAccount();
+export function NavOracleCard({
+    priceCents,
+    hasPrice,
+    isAdmin,
+    isConnected,
+    isLoading,
+    onSettled,
+    onRefresh,
+}: Props) {
+    const {isConnected: walletConnected} = useAccount();
     const {writeContract, isPending} = useWriteContract();
     const {push, update} = useActivityLog();
     const [draftDollars, setDraftDollars] = useState("");
@@ -27,7 +39,7 @@ export function NavOracleCard({priceCents, hasPrice, isAdmin, onSettled}: Props)
         const cents = BigInt(Math.round(dollars * 100));
         const id = push({type: "oracle_update", status: "pending", message: `Update NAV → $${dollars.toFixed(2)}`});
         writeContract(
-            {address: ORACLE_ADDRESS, abi: navOracleAbi, functionName: "updatePrice", args: [cents]},
+            {address: ORACLE_ADDRESS, abi: navOracleAbi, functionName: "updatePrice", args: [cents], chainId: sepolia.id},
             {
                 onSuccess: (txHash) => {
                     update(id, {status: "success", txHash, message: `NAV updated → $${dollars.toFixed(2)}`});
@@ -45,7 +57,7 @@ export function NavOracleCard({priceCents, hasPrice, isAdmin, onSettled}: Props)
     const clear = () => {
         const id = push({type: "oracle_clear", status: "pending", message: "Clear NAV price"});
         writeContract(
-            {address: ORACLE_ADDRESS, abi: navOracleAbi, functionName: "clearPrice"},
+            {address: ORACLE_ADDRESS, abi: navOracleAbi, functionName: "clearPrice", chainId: sepolia.id},
             {
                 onSuccess: (txHash) => {
                     update(id, {status: "success", txHash, message: "Oracle price cleared (atomic-revert demo)"});
@@ -59,79 +71,130 @@ export function NavOracleCard({priceCents, hasPrice, isAdmin, onSettled}: Props)
         );
     };
 
+    const inputDisabled = !walletConnected || !isAdmin || isPending;
+
     return (
         <BentoCard
             accent="blue"
             variant="hero"
-            title="Net Asset Value"
-            subtitle="Live oracle · cross-contract atomic"
+            title="Cross-Contract NAV Oracle"
+            subtitle="Atomic price feed · called from mint/burn/clawback"
             icon={<ChartIcon size={16} />}
-            className="md:row-span-2"
+            className="h-full"
+            action={
+                <button
+                    onClick={onRefresh}
+                    disabled={isLoading}
+                    className="rounded-full border border-zinc-200 bg-white px-3 py-1 text-[11px] font-semibold text-zinc-600 transition hover:border-violet-300 hover:text-violet-700 disabled:opacity-50"
+                >
+                    {isLoading ? "…" : "Refresh"}
+                </button>
+            }
         >
-            <div className="flex items-baseline gap-3">
-                <div className="text-5xl font-semibold tracking-tight text-zinc-900 tabular-nums">
-                    {hasPrice ? formatCentsAsUsd(priceCents) : "—"}
-                </div>
+            {/* Price block */}
+            <div className="rounded-xl border border-zinc-100 bg-white p-5 text-center">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                    Net Asset Value / Unit
+                </p>
                 {hasPrice ? (
-                    <div className="flex items-center gap-1.5">
-                        <span className="relative flex h-2 w-2">
-                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-                            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
-                        </span>
-                        <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">Live</span>
-                    </div>
+                    <>
+                        <p className="mt-2 text-4xl font-semibold tracking-tight text-zinc-900 tabular-nums">
+                            {formatCentsAsUsd(priceCents)}
+                        </p>
+                        <p className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
+                            <span className="relative flex h-2 w-2">
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                            </span>
+                            Live · fetched from oracle contract
+                        </p>
+                    </>
                 ) : (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-amber-700 ring-1 ring-amber-200">
-                        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> No price
-                    </span>
+                    <>
+                        <p className="mt-2 text-3xl font-semibold tracking-tight text-rose-600">No price set</p>
+                        <p className="mt-2 text-[11px] font-semibold text-rose-500">
+                            Mint, burn, and clawback will revert atomically
+                        </p>
+                    </>
                 )}
             </div>
 
-            <div className="mt-1 text-xs text-zinc-500">per unit · published by admin</div>
+            {/* Oracle contract address */}
+            {ORACLE_ADDRESS && (
+                <div className="mt-3 flex items-center justify-between rounded-lg border border-zinc-100 bg-white px-3 py-2">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Oracle</span>
+                    <a
+                        href={explorerAddr(ORACLE_ADDRESS)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1 font-mono text-xs text-violet-600 hover:text-violet-700"
+                    >
+                        {shortAddr(ORACLE_ADDRESS)}
+                        <ExternalLinkIcon size={10} />
+                    </a>
+                </div>
+            )}
 
-            <div className="mt-5 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-zinc-100 pt-4">
+            {/* Stats strip */}
+            <div className="mt-4 grid grid-cols-2 gap-x-6 gap-y-3 border-t border-zinc-100 pt-3">
                 <Stat label="Asset" value="Real Estate" />
                 <Stat label="Quote" value="USD" />
-                <Stat label="Format" value="cents" />
+                <Stat label="Format" value="cents (uint256)" />
                 <Stat label="Atomicity" value={<span className="font-semibold text-emerald-600">guaranteed</span>} />
             </div>
 
-            {!hasPrice && (
-                <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50/60 p-2.5 text-xs text-amber-800">
-                    Mint, burn, and clawback will revert atomically until a price is set.
-                </p>
-            )}
-
-            {isAdmin && (
-                <div className="mt-5 space-y-2 border-t border-zinc-100 pt-4">
-                    <label className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
-                        <SparkleIcon size={11} /> Admin · update price
-                    </label>
-                    <div className="flex gap-2">
+            {/* Admin block — amber, always visible, disabled when not admin. mt-auto pushes to bottom */}
+            <div className="mt-auto pt-4">
+                <div className="space-y-2 rounded-xl border border-amber-200 bg-amber-50/60 p-3">
+                    <div className="flex items-center justify-between">
+                        <label className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-amber-700">
+                            <SparkleIcon size={11} /> Oracle Admin
+                        </label>
+                        {isAdmin ? (
+                            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-700">
+                                ✓ You are admin
+                            </span>
+                        ) : (
+                            <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-amber-700">
+                                Admin only
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex items-stretch gap-2">
                         <input
                             value={draftDollars}
                             onChange={(e) => setDraftDollars(e.target.value)}
-                            placeholder="USD per unit (e.g. 1000.00)"
-                            className="flex-1 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-sm focus:border-cb-500 focus:outline-none focus:ring-2 focus:ring-cb-100"
+                            placeholder="USD per unit"
+                            disabled={inputDisabled}
+                            className="min-w-0 flex-1 rounded-lg border border-amber-200 bg-white px-2.5 py-1.5 text-sm focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-100 disabled:cursor-not-allowed disabled:bg-zinc-50 disabled:text-zinc-400"
                         />
                         <button
                             onClick={submit}
-                            disabled={!isConnected || isPending || !draftDollars}
-                            className="rounded-lg bg-cb-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-cb-700 disabled:opacity-40"
+                            disabled={inputDisabled || !draftDollars}
+                            className="flex-shrink-0 rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-40"
                         >
-                            {isPending ? "…" : "Set"}
+                            {isPending ? "…" : "Update"}
                         </button>
                     </div>
                     <button
                         onClick={clear}
-                        disabled={!isConnected || isPending || !hasPrice}
-                        className="w-full rounded-lg border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 transition hover:bg-amber-100 disabled:opacity-40"
+                        disabled={inputDisabled || !hasPrice}
+                        className="w-full rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-40"
                         title="Demonstrates oracle failure: token mint/burn/clawback will revert"
                     >
-                        Clear price (demo failure)
+                        Clear Price — Demo Oracle Failure
                     </button>
+                    <p className="text-[10px] leading-relaxed text-zinc-600">
+                        Clearing the price causes mint/burn/clawback to revert atomically — the token contract calls this oracle mid-transaction, and if it reverts, the entire tx rolls back.
+                    </p>
+                    {walletConnected && !isAdmin && (
+                        <p className="text-[10px] text-amber-600">Switch to the admin wallet to update the oracle price.</p>
+                    )}
+                    {!isConnected && (
+                        <p className="text-[10px] text-zinc-400">Connect wallet to enable.</p>
+                    )}
                 </div>
-            )}
+            </div>
         </BentoCard>
     );
 }

@@ -1,0 +1,494 @@
+{
+  "version": "1.1.0",
+  "chain": "ethereum-sepolia",
+  "chain_id": 11155111,
+  "contracts": {
+    "NavOracle": {
+      "address": "0xdD0505aE6aca4a4b93Ddac4BFCcCb413801104C4",
+      "events": [
+        {
+          "name": "OwnershipTransferred",
+          "anonymous": false,
+          "inputs": [
+            {
+              "name": "previousOwner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "newOwner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "name": "PriceCleared",
+          "anonymous": false,
+          "inputs": [
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "timestamp",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "PriceUpdated",
+          "anonymous": false,
+          "inputs": [
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "price",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "timestamp",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ]
+        }
+      ]
+    },
+    "TokenizedFund": {
+      "address": "0xDd830F76A80947c3B4445D78F7d74b86Dc754Acd",
+      "events": [
+        {
+          "name": "Approval",
+          "anonymous": false,
+          "inputs": [
+            {
+              "name": "owner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "spender",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "Burned",
+          "anonymous": false,
+          "inputs": [
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "user",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "newBalance",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "circulatingSupply",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "navPrice",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "timestamp",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "Clawback",
+          "anonymous": false,
+          "inputs": [
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "user",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "newBalance",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "circulatingSupply",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "navPrice",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "reason",
+              "type": "string",
+              "indexed": false,
+              "internalType": "string"
+            },
+            {
+              "name": "severity",
+              "type": "int32",
+              "indexed": false,
+              "internalType": "int32"
+            },
+            {
+              "name": "caseReference",
+              "type": "int64",
+              "indexed": false,
+              "internalType": "int64"
+            },
+            {
+              "name": "timestamp",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "Initialized",
+          "anonymous": false,
+          "inputs": [
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "assetName",
+              "type": "string",
+              "indexed": false,
+              "internalType": "string"
+            },
+            {
+              "name": "metadata",
+              "type": "tuple",
+              "indexed": false,
+              "internalType": "struct TokenizedFund.AssetMetadata",
+              "components": [
+                {
+                  "name": "assetType",
+                  "type": "string",
+                  "internalType": "string"
+                },
+                {
+                  "name": "documentHash",
+                  "type": "bytes",
+                  "internalType": "bytes"
+                },
+                {
+                  "name": "country",
+                  "type": "string",
+                  "internalType": "string"
+                },
+                {
+                  "name": "region",
+                  "type": "string",
+                  "internalType": "string"
+                },
+                {
+                  "name": "issuedAt",
+                  "type": "uint256",
+                  "internalType": "uint256"
+                },
+                {
+                  "name": "minInvestment",
+                  "type": "uint256",
+                  "internalType": "uint256"
+                },
+                {
+                  "name": "isin",
+                  "type": "string",
+                  "internalType": "string"
+                },
+                {
+                  "name": "totalSupplyCap",
+                  "type": "uint256",
+                  "internalType": "uint256"
+                },
+                {
+                  "name": "status",
+                  "type": "uint8",
+                  "internalType": "enum TokenizedFund.AssetStatus"
+                },
+                {
+                  "name": "tags",
+                  "type": "string[]",
+                  "internalType": "string[]"
+                },
+                {
+                  "name": "propertyKeys",
+                  "type": "string[]",
+                  "internalType": "string[]"
+                },
+                {
+                  "name": "propertyValues",
+                  "type": "string[]",
+                  "internalType": "string[]"
+                }
+              ]
+            },
+            {
+              "name": "timestamp",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "Minted",
+          "anonymous": false,
+          "inputs": [
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "user",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "newBalance",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "circulatingSupply",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "navPrice",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            },
+            {
+              "name": "timestamp",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "OwnershipTransferred",
+          "anonymous": false,
+          "inputs": [
+            {
+              "name": "previousOwner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "newOwner",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            }
+          ]
+        },
+        {
+          "name": "Transfer",
+          "anonymous": false,
+          "inputs": [
+            {
+              "name": "from",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "to",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "value",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ]
+        },
+        {
+          "name": "UserApproved",
+          "anonymous": false,
+          "inputs": [
+            {
+              "name": "admin",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "user",
+              "type": "address",
+              "indexed": true,
+              "internalType": "address"
+            },
+            {
+              "name": "approved",
+              "type": "bool",
+              "indexed": false,
+              "internalType": "bool"
+            },
+            {
+              "name": "timestamp",
+              "type": "uint256",
+              "indexed": false,
+              "internalType": "uint256"
+            }
+          ]
+        }
+      ],
+      "structs": [
+        {
+          "name": "AssetMetadata",
+          "fields": [
+            {
+              "name": "assetType",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "documentHash",
+              "type": "bytes",
+              "internalType": "bytes"
+            },
+            {
+              "name": "country",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "region",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "issuedAt",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "minInvestment",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "isin",
+              "type": "string",
+              "internalType": "string"
+            },
+            {
+              "name": "totalSupplyCap",
+              "type": "uint256",
+              "internalType": "uint256"
+            },
+            {
+              "name": "status",
+              "type": "uint8",
+              "internalType": "enum TokenizedFund.AssetStatus"
+            },
+            {
+              "name": "tags",
+              "type": "string[]",
+              "internalType": "string[]"
+            },
+            {
+              "name": "propertyKeys",
+              "type": "string[]",
+              "internalType": "string[]"
+            },
+            {
+              "name": "propertyValues",
+              "type": "string[]",
+              "internalType": "string[]"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

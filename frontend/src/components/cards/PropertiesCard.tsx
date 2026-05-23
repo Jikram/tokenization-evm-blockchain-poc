@@ -47,7 +47,7 @@ function valueElement(key: string, value: string) {
     if (k === "fund_manager") {
         return (
             <div className="flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-cb-600 to-violet-500 text-[11px] font-bold text-white shadow-sm">
+                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-violet-500 text-[11px] font-bold text-white shadow-sm">
                     {value.charAt(0).toUpperCase()}
                 </div>
                 <span className="font-medium text-zinc-800">{value}</span>

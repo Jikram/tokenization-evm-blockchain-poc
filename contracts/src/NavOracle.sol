@@ -17,8 +17,19 @@ contract NavOracle is Ownable {
 
     error NoPriceSet();
     error PriceMustBePositive();
+    error AdminImmutable();
 
     constructor(address admin) Ownable(admin) {}
+
+    /// @notice Admin is locked at deploy time and cannot be changed — matches the
+    ///         Stellar sibling POC's `initialize-once` semantics.
+    function transferOwnership(address) public pure override {
+        revert AdminImmutable();
+    }
+
+    function renounceOwnership() public pure override {
+        revert AdminImmutable();
+    }
 
     /// @notice Set the NAV price in cents. Must be > 0.
     function updatePrice(uint256 price) external onlyOwner {
