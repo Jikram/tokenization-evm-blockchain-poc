@@ -1,0 +1,11 @@
+{
+  "git.detectSubmodules": false,
+  "git.openRepositoryInParentFolders": "never",
+  "files.exclude": {
+    "**/contracts/lib": true,
+    "**/contracts/out": true,
+    "**/contracts/cache": true,
+    "**/contracts/broadcast": true,
+    "**/.next": true
+  }
+}
