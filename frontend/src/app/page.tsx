@@ -15,6 +15,7 @@ import {ActivityLogCard} from "@/components/cards/ActivityLogCard";
 import {OnChainEventsCard} from "@/components/cards/OnChainEventsCard";
 import {useFundOverview, useUserState} from "@/hooks/useFund";
 import {ShieldCheckIcon} from "@/components/Icon";
+import {SecretsSourceBadge} from "@/components/SecretsSourceBadge";
 import {FUND_ADDRESS} from "@/lib/contracts";
 import {formatUnits} from "@/lib/format";
 
@@ -55,8 +56,9 @@ export default function Home() {
                         </p>
                     </div>
                 </div>
-                <div className="flex-shrink-0">
+                <div className="flex flex-shrink-0 flex-col items-end gap-2">
                     <ConnectWallet />
+                    <SecretsSourceBadge />
                 </div>
             </header>
 

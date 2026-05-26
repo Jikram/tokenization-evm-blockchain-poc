@@ -69,6 +69,10 @@ npm run dev
 
 The live deployment is at https://evm-tokenization-ji.vercel.app. Connect with the MetaMask extension or scan the QR with MetaMask Mobile (or any WalletConnect-compatible wallet).
 
+## Secrets management
+
+The deploy script accepts secrets either as plaintext in `contracts/.env` (default) or as 1Password references in the same file. If the file contains `op://...` URIs and the 1Password CLI is installed, the script transparently re-execs itself under `op run`. See [`docs/secrets-1password.md`](./docs/secrets-1password.md) and the committed [`contracts/.env.1password.example`](./contracts/.env.1password.example) / [`frontend/.env.1password.example`](./frontend/.env.1password.example) templates. A sample CI workflow at [`.github/workflows/deploy-with-1password.yml`](./.github/workflows/deploy-with-1password.yml) shows the service-account pattern.
+
 ## Code quality checks
 
 ```bash
